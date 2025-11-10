@@ -28,7 +28,7 @@ const toRow = (r)=>({id:r.id,title:r.title,making_time:r.making_time,serves:r.se
 app.post("/recipes",(req,res)=>{
   const b=req.body||{};
   const missing=REQUIRED.filter(k=>!b[k]);
-  if(missing.length) return res.status(200).json({message:"Recipe creation failed!",required:"title, making_time, serves, ingredients, cost"});
+  if(missing.length) return res.status(400).json({message:"Recipe creation failed!",required:"title, making_time, serves, ingredients, cost"});
   const now=today();
   db.run(`INSERT INTO recipes(title,making_time,serves,ingredients,cost,created_at,updated_at) VALUES(?,?,?,?,?,?,?)`,
     [b.title,b.making_time,b.serves,b.ingredients,b.cost,now,now],
@@ -49,6 +49,8 @@ app.get("/recipes",(_req,res)=>{
     res.status(200).json({recipes: rows.map(toRow)});
   });
 });
+
+
 // GET by id
 app.get("/recipes/:id",(req,res)=>{
   db.get("SELECT * FROM recipes WHERE id=?",[req.params.id],(e,row)=>{
@@ -81,10 +83,12 @@ app.patch("/recipes/:id",(req,res)=>{
 app.delete("/recipes/:id",(req,res)=>{
   db.run("DELETE FROM recipes WHERE id=?",[req.params.id],function(err){
     if(err) return res.status(500).json({message:"internal error"});
-    if(this.changes===0) return res.status(404).json({message:"404 Not Found"});
+    if(this.changes===0) return res.status(404).json({message:"No recipe found."});
     res.status(200).json({message:"Recipe successfully removed!"});
   });
 });
+
+
 // 404
 app.use((_req,res)=>res.status(404).json({message:"404 Not Found"}));
 const PORT=process.env.PORT||8080;
