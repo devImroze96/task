@@ -28,7 +28,7 @@ const toRow = (r)=>({id:r.id,title:r.title,making_time:r.making_time,serves:r.se
 app.post("/recipes",(req,res)=>{
   const b=req.body||{};
   const missing=REQUIRED.filter(k=>!b[k]);
-  if(missing.length) return res.status(400).json({message:"Recipe creation failed!",required:"title, making_time, serves, ingredients, cost"});
+  if(missing.length) return res.status(200).json({message:"Recipe creation failed!",required:"title, making_time, serves, ingredients, cost"});
   const now=today();
   db.run(`INSERT INTO recipes(title,making_time,serves,ingredients,cost,created_at,updated_at) VALUES(?,?,?,?,?,?,?)`,
     [b.title,b.making_time,b.serves,b.ingredients,b.cost,now,now],
